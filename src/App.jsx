@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './App.css';
+import { nanoid } from 'nanoid';
 
 function App() {
   const [idInstance, setIdInstance] = useState('');
@@ -7,6 +8,8 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [recipient, setRecipient] = useState('');
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([]);
 
   function handleLogin(event) {
     event.preventDefault();
@@ -19,9 +22,30 @@ function App() {
   function handleCreateChat(event) {
     event.preventDefault();
 
-    if (phoneNumber.trim()) {
-      setRecipient(phoneNumber.trim());
+    const phone = phoneNumber.trim();
+
+    if (phone && phone !== recipient) {
+      setRecipient(phone);
+      setMessages([]);
+      setMessage('');
     }
+  }
+
+  function handleSendMessage(event) {
+    event.preventDefault();
+
+    if (!message.trim() || !recipient) {
+      return;
+    }
+
+    const newMessage = {
+      id: nanoid(),
+      text: message.trim(),
+    };
+
+    setMessages((prev) => [...prev, newMessage]);
+
+    setMessage('');
   }
 
   return isLoggedIn ? (
@@ -40,6 +64,27 @@ function App() {
 
         <button type="submit">Создать чат</button>
       </form>
+
+      {recipient ? (
+        <section>
+          <ul>
+            {messages.map((item) => (
+              <li key={item.id}>{item.text}</li>
+            ))}
+          </ul>
+
+          <form onSubmit={handleSendMessage}>
+            <input
+              type="text"
+              placeholder="Введите сообщение"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+
+            <button type="submit">Отправить</button>
+          </form>
+        </section>
+      ) : null}
     </main>
   ) : (
     <div className="main">
