@@ -266,9 +266,37 @@ function App() {
     }
   }
 
+  function handleBack() {
+    setIsLoggedIn(false);
+
+    setIdInstance('');
+    setApiTokenInstance('');
+    setPhoneNumber('');
+    setRecipient('');
+    setChatId('');
+    setMessage('');
+    setMessages([]);
+
+    setLoginError('');
+    setChatError('');
+    setSendError('');
+    setReceiveError('');
+  }
+
   return isLoggedIn ? (
     <main>
-      <h1>Чат</h1>
+      <div className="chat-header">
+        <h1>Чат</h1>
+
+        <button
+          type="button"
+          className="back-button"
+          onClick={handleBack}
+          disabled={isSending || isCreatingChat}
+        >
+          Сменить инстанс
+        </button>
+      </div>
       <form onSubmit={handleCreateChat}>
         <label>
           Номер получателя
@@ -294,7 +322,11 @@ function App() {
           <p>{receiveError}</p>
           <ul>
             {messages.map((item) => (
-              <li key={item.id} style={{ whiteSpace: 'pre-wrap' }}>
+              <li
+                key={item.id}
+                className={item.direction}
+                style={{ whiteSpace: 'pre-wrap' }}
+              >
                 {item.direction === 'outgoing' ? 'Вы: ' : 'Собеседник: '}
                 {item.text}
               </li>
@@ -326,6 +358,9 @@ function App() {
   ) : (
     <div className="main">
       <form className="login-form" onSubmit={handleLogin}>
+        <div className="login-header">
+          <h1>Вход в чат MAX</h1>
+        </div>
         <label>
           idInstance
           <input
@@ -333,6 +368,7 @@ function App() {
             name="idInstance"
             value={idInstance}
             onChange={(e) => setIdInstance(e.target.value)}
+            disabled={isLoading}
           />
         </label>
 
@@ -343,6 +379,7 @@ function App() {
             name="apiTokenInstance"
             value={apiTokenInstance}
             onChange={(e) => setApiTokenInstance(e.target.value)}
+            disabled={isLoading}
           />
         </label>
         <p style={{ color: 'red' }}>{loginError}</p>

@@ -5,21 +5,169 @@
   align-items: center;
 }
 
-.login-form {
-  width: 300px;
+main {
+  width: calc(100% - 32px);
+  max-width: 700px;
+  margin: 24px auto;
+  padding: 20px;
+  background: white;
+}
+
+h1 {
+  margin: 0 0 20px;
+}
+
+label {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 6px;
+}
+
+input,
+button {
+  padding: 15px 10px;
+  border-radius: 8px;
+}
+
+input {
+  min-width: 0;
+  border: 1px solid #ccc;
+}
+
+button {
+  border: none;
+  background: #478dff;
+  color: white;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+main form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+main form label,
+main section form input {
+  flex: 1;
+}
+
+main form p {
+  width: 100%;
+  order: 1;
+  margin: 0;
+  color: #ff0000;
+}
+
+p:empty {
+  display: none;
+}
+
+ul {
+  height: 45vh;
+  min-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  list-style: none;
+  background: #f1f6fd;
+  border-radius: 8px;
+}
+
+li {
+  align-self: flex-start;
+  max-width: 80%;
+  padding: 10px 14px;
+  background: white;
+  border-radius: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+li.outgoing {
+  align-self: flex-end;
+  background: #c4dcff;
+}
+
+.login-form {
+  width: 380px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 32px;
+  box-sizing: border-box;
+  background: white;
+  border: 1px solid #eef1f5;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px #121d3112;
+}
+
+.login-header h1 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  color: #0e131f;
 }
 
 .login-form label {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  font-size: 14px;
+  color: #293242;
 }
 
-.login-form input,
-.login-form button {
-  padding: 10px;
+.login-form input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #d7dee9;
+  border-radius: 8px;
+  background: #f8faff;
+  font-size: 16px;
+}
 
+.login-form input:focus {
+  border-color: #4188fa;
+  outline: 2px solid #d6e6fd;
+}
+
+.login-form button {
+  padding: 13px;
+  border-radius: 8px;
+  background: #2c7cfd;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.login-form button:hover:not(:disabled) {
+  background: #1a65df;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+
+.back-button {
+  background: #90b4f0;
+  color: #ffffff;
+}
+
+
+.back-button:hover {
+  background: #b3d0ff;
 }
