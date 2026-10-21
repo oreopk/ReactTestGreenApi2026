@@ -2,6 +2,14 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import { nanoid } from 'nanoid';
 import { IMaskInput } from 'react-imask';
+import MessageList from './MessageList';
+import {
+  sendMessage,
+  getStateInstance,
+  checkAccount,
+  receiveNotification,
+  deleteNotification,
+} from './api';
 
 function App() {
   const [idInstance, setIdInstance] = useState('');
@@ -20,16 +28,12 @@ function App() {
   const [sendError, setSendError] = useState('');
   const [receiveError, setReceiveError] = useState('');
 
-  const apiUrl = 'https://api.green-api.com';
-
   useEffect(() => {
     if (!isLoggedIn || !chatId) {
       return;
     }
 
     const controller = new AbortController();
-    const baseUrl = `${apiUrl}/waInstance${idInstance.trim()}`;
-    const token = apiTokenInstance.trim();
 
     let timer;
 
@@ -37,22 +41,11 @@ function App() {
       let delay = 1000;
 
       try {
-        const response = await fetch(
-          `${baseUrl}/receiveNotification/${token}?receiveTimeout=5`,
-          { signal: controller.signal },
+        const notification = await receiveNotification(
+          idInstance,
+          apiTokenInstance,
+          controller.signal,
         );
-
-        if (!response.ok) {
-          throw new Error(`Ошибка: ${response.status}`);
-        }
-
-        let notification;
-        const raw = await response.text();
-        if (raw.trim()) {
-          notification = JSON.parse(raw);
-        } else {
-          notification = null;
-        }
 
         if (controller.signal.aborted) {
           return;
@@ -93,17 +86,12 @@ function App() {
           });
         }
 
-        const deleteResponse = await fetch(
-          `${baseUrl}/deleteNotification/${token}/${receiptId}`,
-          {
-            method: 'DELETE',
-            signal: controller.signal,
-          },
+        await deleteNotification(
+          idInstance,
+          apiTokenInstance,
+          receiptId,
+          controller.signal,
         );
-
-        if (!deleteResponse.ok) {
-          throw new Error(deleteResponse.status);
-        }
 
         if (!controller.signal.aborted) {
           setReceiveError('');
@@ -128,7 +116,7 @@ function App() {
       controller.abort();
       clearTimeout(timer);
     };
-  }, [isLoggedIn, chatId, idInstance, apiTokenInstance, apiUrl]);
+  }, [isLoggedIn, chatId, idInstance, apiTokenInstance]);
 
   async function handleLogin(event) {
     event.preventDefault();
@@ -142,15 +130,7 @@ function App() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `${apiUrl}/waInstance${idInstance.trim()}/getStateInstance/${apiTokenInstance.trim()}`,
-      );
-
-      if (!response.ok) {
-        throw new Error(`Ошибка запроса: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await getStateInstance(idInstance, apiTokenInstance);
 
       if (data.stateInstance !== 'authorized') {
         throw new Error('Нет инстанса');
@@ -182,24 +162,7 @@ function App() {
     setIsCreatingChat(true);
 
     try {
-      const response = await fetch(
-        `${apiUrl}/waInstance${idInstance.trim()}/checkAccount/${apiTokenInstance.trim()}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            phoneNumber: Number(phone),
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(response.status);
-      }
-
-      const data = await response.json();
+      const data = await checkAccount(idInstance, apiTokenInstance, phone);
 
       if (!data.exist || !data.chatId) {
         throw new Error('Получатель не найден');
@@ -230,25 +193,12 @@ function App() {
     setIsSending(true);
 
     try {
-      const response = await fetch(
-        `${apiUrl}/waInstance${idInstance.trim()}/sendMessage/${apiTokenInstance.trim()}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            chatId,
-            message: text,
-          }),
-        },
+      const data = await sendMessage(
+        idInstance,
+        apiTokenInstance,
+        chatId,
+        text,
       );
-
-      if (!response.ok) {
-        throw new Error(response.status);
-      }
-
-      const data = await response.json();
 
       const newMessage = {
         id: nanoid(),
@@ -320,18 +270,7 @@ function App() {
         <section>
           <p>Чат с {recipient}</p>
           <p>{receiveError}</p>
-          <ul>
-            {messages.map((item) => (
-              <li
-                key={item.id}
-                className={item.direction}
-                style={{ whiteSpace: 'pre-wrap' }}
-              >
-                {item.direction === 'outgoing' ? 'Вы: ' : 'Собеседник: '}
-                {item.text}
-              </li>
-            ))}
-          </ul>
+          <MessageList messages={messages} />
 
           <form onSubmit={handleSendMessage}>
             <input
